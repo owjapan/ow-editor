@@ -114,6 +114,27 @@ test('text remaining after image deletion aligns to the body edge instead of a c
     await page.screenshot({ path: path.join(results, 'figure-text-right.png'), fullPage: true })
   })
 })
+test('bullet and numbered lists can start and stop on text remaining after image deletion', async () => {
+  for (const [command, tag, marker] of [['bulletList', 'ul', 'disc'], ['orderedList', 'ol', 'decimal']]) {
+    await pageAt('demo.html', async page => {
+      await page.waitForSelector('.df-editor-body[contenteditable=true]')
+      await page.click('[data-rte-action=source]')
+      await page.$eval('[data-rte-source]', e => { e.value = '<figure class="image" style="width:30%;margin-left:auto"><strong>List text</strong></figure><p>Unchanged paragraph</p>' })
+      await page.click('[data-rte-apply]')
+      await page.click('.df-editor-body > figure')
+      await page.click(`[data-rte-action=${command}]`)
+      assert.equal(await page.$$eval(`.df-editor-body > ${tag} > li`, items => items.length), 1)
+      assert.equal(await page.$eval(`.df-editor-body > ${tag} > li`, e => getComputedStyle(e).display), 'list-item')
+      assert.equal(await page.$eval(`.df-editor-body > ${tag}`, e => getComputedStyle(e).listStyleType), marker)
+      assert.equal(await page.$eval(`.df-editor-body > ${tag} > li > div`, e => e.className), '')
+      assert.equal(await page.$eval(`.df-editor-body > ${tag} strong`, e => e.textContent), 'List text')
+      await page.screenshot({ path: path.join(results, `${command}-deleted-image.png`), fullPage: true })
+      await page.click(`[data-rte-action=${command}]`)
+      assert.equal(await page.$$eval(`.df-editor-body > ${tag}`, items => items.length), 0)
+      assert.equal(await page.$eval('.df-editor-body > div strong', e => e.textContent), 'List text')
+    })
+  }
+})
 test('source editing blocks export, cancel retains text and apply removes executable HTML', async () => {
   await pageAt('demo.html', async page => {
     await page.waitForSelector('.df-editor-body[contenteditable=true]')

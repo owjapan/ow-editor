@@ -4,12 +4,12 @@
   "status": "preview",
   "files": {
     "ow-editor.js": {
-      "bytes": 88624,
-      "integrity": "sha384-rACw/3UhnMwRDegVEmeC6RPvpWM32W7h5KBEPaTqs2GD9Enjkpz3QRO2cWg5gIvP"
+      "bytes": 88925,
+      "integrity": "sha384-DrShAy7yx7yyuWXiNAKzFaYUMMa0NgSzo9e6h/bxQKo7tw9YctCH1t/FTUXvMCwU"
     },
     "ow-editor.mjs": {
-      "bytes": 88120,
-      "integrity": "sha384-SzjHrNhj4nevP/gHAD0j5AcTgMgwxm0Gmec8wLiDKNwnZyMLzBkDWxHpPf3J/y71"
+      "bytes": 88421,
+      "integrity": "sha384-LbpoRik11ZLZf8HxLPWRiIal8LKwRvMzvNq1xrCmo3k2p4eUjQGvnSuvZj5zBGhO"
     },
     "ow-editor.css": {
       "bytes": 6155,
