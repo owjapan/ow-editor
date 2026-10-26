@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>記事編集デモ — OWEditor</title><link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/site.css"><link rel="stylesheet" href="releases/0.1.0/ow-editor.css"><script src="releases/0.1.0/ow-editor.js" defer></script><script src="assets/demo.js" defer></script></head>
+<body>
+  <a class="skip" href="#main">本文へ</a>
+  <header class="site-header"><nav class="nav shell" aria-label="メインナビゲーション"><a class="brand" href="./"><img src="assets/logo.svg" width="30" height="30" alt="">OWEditor <span class="version">0.1.0 Preview</span></a><div class="nav-links"><a href="./#features">機能紹介</a><a class="current" href="demo.html" aria-current="page">デモ</a><a href="multiple.html">複数フィールド</a><a href="https://github.com/owjapan/ow-editor">GitHub ↗</a></div></nav></header>
+  <main id="main" class="shell demo-main">
+    <div class="demo-heading"><p class="eyebrow">INTERACTIVE DEMO</p><h1>記事編集のデモ</h1><p class="muted">本文を書いて、書式や表を編集してみてください。HTMLファイルとしてダウンロードできます。</p></div>
+    <aside class="demo-note"><b>このデモの保存先は、あなたのブラウザーです。</b>本文・画像を送信するAPIはありません。下書きは同じタブ内に保持します。実際のファイルアップロードには、利用先の画像APIを接続してください。</aside>
+    <section id="workspace" aria-label="記事編集サンプル">
+      <div class="workspace-top"><span class="pill"><span class="status-dot"></span>サーバーへの本文送信なし</span><button type="button" id="sample-image" disabled>サンプル画像を追加</button></div>
+      <form id="demo-form">
+        <label class="field-label" for="demo-body">記事本文</label>
+        <textarea id="demo-body" name="body" readonly><h2>週末の小さな旅</h2><p>少し足を伸ばして、いつもと違う景色を見に行きませんか。</p><p><strong>お気に入りの場所</strong>を見つけたら、ここに写真やメモを残せます。</p><table style="width:100%;border-collapse:collapse"><thead><tr><th>持ちもの</th><th>メモ</th></tr></thead><tbody><tr><td>カメラ</td><td>充電を忘れずに</td></tr><tr><td>歩きやすい靴</td><td>寄り道も楽しもう</td></tr></tbody></table><blockquote><p>予定を詰め込まず、景色を楽しむ時間を。</p></blockquote></textarea>
+        <p id="init-error" role="alert">エディターを読み込んでいます。表示されない場合は、JavaScriptとファイルの読み込みを確認してください。</p>
+        <noscript><p>デモにはJavaScriptが必要です。</p></noscript>
+        <div class="demo-actions"><button type="submit" class="button primary" disabled>HTMLをダウンロード</button><button type="button" class="button secondary" id="show-html" disabled>HTMLを見る</button><span id="save-result" role="status"></span></div>
+      </form>
+      <details id="html-result"><summary>出力したHTML</summary><pre id="result"></pre></details>
+    </section>
+    <div class="usage-hints"><article><span class="feature-number">画像</span><h2>幅・配置・説明文を試す</h2><p>「サンプル画像を追加」を押し、画像をクリックすると設定が表示されます。用意した画像だけを使うため、アップロードは行いません。</p></article><article><span class="feature-number">表</span><h2>セルを選んで編集する</h2><p>セルをクリックすると表の操作が表示されます。Shiftを押しながら別のセルをクリックすると、結合する範囲を選べます。</p></article><article><span class="feature-number">HTML</span><h2>ソースも編集できる</h2><p>ツールバーの「〈/〉」から編集できます。「適用」で反映し、「取消」で元の本文へ戻ります。</p></article></div>
+  </main>
+  <footer class="shell footer"><a href="./">← 機能紹介へ</a><p>OWEditor 0.1.0 · Public preview</p><a href="multiple.html">複数フィールドを試す →</a></footer>
+</body></html>

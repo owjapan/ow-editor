@@ -1,0 +1,68 @@
+.df-editor, .df-editor *, .df-editor *::before, .df-editor *::after { box-sizing: border-box; }
+.df-editor {
+  --df-editor-accent: #1769aa;
+  position: relative; width: 100%; min-width: 0; color: #202b36; background: #fff; border: 1px solid #b8c1cb; border-radius: 6px; font: 14px/1.5 system-ui, sans-serif;
+  [hidden] { display: none !important; }
+  .df-editor-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; padding: 10px 14px; color: #4b5967; border-bottom: 1px solid #d6dde5; background: #fff; }
+  .df-editor-heading strong { font-size: 13px; font-weight: 600; letter-spacing: .03em; }
+  .df-editor-heading span { font-size: 12px; }
+  button, select, input { font: inherit; color: inherit; }
+  button { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: 32px; min-height: 32px; padding: 4px 8px; border: 1px solid transparent; border-radius: 4px; background: transparent; cursor: pointer; }
+  button:hover:not(:disabled), button[aria-pressed=true] { background: #e6effa; border-color: #adc9e8; color: #114b80; }
+  button[aria-pressed=true] { box-shadow: inset 0 -2px var(--df-editor-accent); }
+  button:disabled, select:disabled { opacity: .4; cursor: default; }
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--df-editor-accent); outline-offset: 2px; }
+  button svg { width: 19px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .df-editor-icon { font: 600 19px/1 Georgia, serif; min-width: 18px; }
+  .icon-italic { font-style: italic; }
+  .icon-underline { text-decoration: underline; }
+  .icon-strike { text-decoration: line-through; }
+  .icon-source { font: 600 13px/1 monospace; }
+  .df-editor-toolbar { display: flex; flex-wrap: wrap; align-items: center; padding: 5px; gap: 3px 0; border-bottom: 1px solid #d6dde5; background: #f6f8fa; }
+  .df-editor-group { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 2px; padding: 0 5px; border-right: 1px solid #d6dde5; min-height: 34px; max-width: 100%; min-width: 0; }
+  .df-editor-group:last-child { border-right: 0; }
+  .df-editor-toolbar select { min-height: 30px; max-width: 140px; padding: 3px; border: 1px solid #c6ced8; border-radius: 3px; background: #fff; font-size: 12px; }
+  .df-editor-color { display: inline-flex; align-items: center; gap: 3px; margin: 0 4px; font-size: 11px; }
+  .df-editor-color input { width: 25px; height: 25px; padding: 0; border: 1px solid #c6ced8; background: #fff; }
+  .df-editor-body { position: relative; contain: layout paint; isolation: isolate; min-height: 340px; max-height: 70vh; overflow: auto; padding: 18px 20px; outline: 0; line-height: 1.7; overflow-wrap: anywhere; }
+  .df-editor-body:focus { box-shadow: inset 0 0 0 2px #a6c6e9; }
+  .df-editor-body[contenteditable=false] { background: #f7f8fa; }
+  .df-editor-body p { margin: 0 0 12px; }
+  .df-editor-body figure { max-width: 100%; }
+  .df-editor-body figure.image { display: table; margin: 12px auto; }
+  .df-editor-body figcaption { color: #536171; font-size: .9em; text-align: center; background: #f2f5f7; padding: 5px 8px; }
+  .df-editor-body img { max-width: 100%; height: auto; cursor: pointer; }
+  .df-editor-body table { border-collapse: collapse; max-width: 100%; margin: 12px 0; }
+  .df-editor-body td, .df-editor-body th { border: 1px solid #a7b1bd; min-width: 38px; padding: 6px; }
+  .df-editor-body th { background: #f0f3f7; font-weight: bold; }
+  .df-editor-body .rte-cell-selected { box-shadow: inset 0 0 0 2px #4b91d1; }
+  .df-editor-body blockquote { border-left: 4px solid #b2c6db; margin-left: 0; padding-left: 18px; color: #435164; }
+  .df-editor-status { margin: 0; padding: 8px 12px; color: #536171; font-size: 12px; border-top: 1px solid #e0e5ec; }
+  .df-editor-error { color: #a12626; background: #fff0f0; }
+  .df-editor-panel, .df-editor-context, .df-editor-draft { padding: 10px 12px; border-bottom: 1px solid #d6dde5; background: #f4f8fc; }
+  .df-editor-panel h3 { font-size: 15px; font-weight: 600; margin: 0 0 10px; }
+  .df-editor-field { display: inline-flex; flex-direction: column; gap: 4px; margin: 0 12px 10px 0; font-size: 12px; vertical-align: top; }
+  .df-editor-field input { padding: 6px 8px; border: 1px solid #b4c2d1; border-radius: 4px; background: #fff; min-height: 34px; max-width: 100%; }
+  .df-editor-field input[type=text] { width: 260px; }
+  .df-editor-field input[type=number] { width: 120px; }
+  .df-editor-panel select { min-height: 34px; border: 1px solid #b4c2d1; background: #fff; }
+  .df-editor-actions { display: flex; gap: 8px; margin-top: 8px; }
+  .df-editor-primary { background: #1769aa; color: white; padding-left: 16px; padding-right: 16px; }
+  .df-editor-source { display: block; width: 100%; min-height: 300px; padding: 12px; font: 13px/1.6 monospace; color: #172a3c; background: #fff; border: 1px solid #b4c2d1; }
+  .df-editor-preview { contain: layout paint; padding: 12px; background: #fff; border: 1px solid #d6dde5; max-height: 400px; overflow: auto; }
+  .df-editor-context { display: flex; align-items: center; flex-wrap: wrap; gap: 3px; font-size: 12px; }
+  .df-editor-context label { display: inline-flex; align-items: center; gap: 8px; margin: 0 8px; }
+  .df-editor-context small { width: 100%; color: #536171; }
+  .df-editor-draft { color: #704e10; background: #fff5d9; font-size: 13px; }
+  .df-editor-draft button { text-decoration: underline; }
+}
+.df-editor-fullscreen { position: fixed; inset: 12px; z-index: 10000; width: auto; display: flex; flex-direction: column; box-shadow: 0 0 0 16px #0008; }
+.df-editor-fullscreen .df-editor-body { flex: 1; max-height: none; min-height: 0; }
+@media (max-width: 600px) {
+  .df-editor .df-editor-body { padding: 12px; min-height: 260px; }
+  .df-editor .df-editor-group { padding: 0 3px; }
+  .df-editor .df-editor-field { max-width: 100%; }
+  .df-editor .df-editor-field input[type=text] { width: 240px; }
+  .df-editor .df-editor-toolbar button { min-height: 36px; min-width: 34px; }
+  .df-editor-fullscreen { inset: 3px; }
+}

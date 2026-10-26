@@ -1,0 +1,44 @@
+{
+  "name": "@owjapan/ow-editor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reusable HTML editor with an original editing engine, Japanese UI, tables and images.",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "main": "dist/ow-editor.js",
+  "module": "dist/ow-editor.mjs",
+  "style": "dist/ow-editor.css",
+  "exports": {
+    ".": {
+      "import": "./dist/ow-editor.mjs",
+      "require": "./dist/ow-editor.js"
+    },
+    "./style.css": "./dist/ow-editor.css"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.cjs",
+    "build": "node scripts/build.cjs",
+    "test:browser": "node test/browser.cjs",
+    "serve": "node scripts/serve.cjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/owjapan/ow-editor.git"
+  },
+  "homepage": "https://owjapan.github.io/ow-editor/",
+  "dependencies": {
+    "dompurify": "3.4.17"
+  },
+  "devDependencies": {
+    "webpack": "5.112.1",
+    "webpack-cli": "7.2.3",
+    "sass": "1.106.1",
+    "sass-loader": "17.0.1",
+    "css-loader": "7.1.5",
+    "mini-css-extract-plugin": "2.10.2",
+    "jsdom": "27.4.0",
+    "puppeteer-core": "25.16.0"
+  }
+}

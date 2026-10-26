@@ -1,0 +1,19 @@
+{
+  "name": "OWEditor",
+  "version": "0.1.0",
+  "status": "preview",
+  "files": {
+    "ow-editor.js": {
+      "bytes": 87279,
+      "integrity": "sha384-MOrIn2R2JFGDWRJDal4HQQE3hbLt0hYckX9vBj8Ma0SkqgultoenwYpgXOaqYlU6"
+    },
+    "ow-editor.mjs": {
+      "bytes": 86775,
+      "integrity": "sha384-MHcU6pmz+4TX5ICAwOz53hhmyu7OT4AduVm41kklyrvXqts6MCgCCuh3QX73OeHQ"
+    },
+    "ow-editor.css": {
+      "bytes": 6155,
+      "integrity": "sha384-rq3VnPvqV+fRw2kjxbzn2Fx8cmBbcGc5RiOl3x1cONrM3GFWXtxewIpbDwo0nD0z"
+    }
+  }
+}

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="OWEditorは独自の編集エンジンを持つHTMLエディターです。文字・画像・表の編集機能、動作サンプル、組み込み方を紹介します。">
+  <title>OWEditor — 機能紹介</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+  <a class="skip" href="#main">本文へ</a>
+  <header class="site-header"><nav class="nav shell" aria-label="メインナビゲーション">
+    <a class="brand" href="./"><img src="assets/logo.svg" width="30" height="30" alt="">OWEditor <span class="version">0.1.0 Preview</span></a>
+    <div class="nav-links"><a href="#features">機能</a><a href="demo.html">デモ</a><a href="#integration">導入</a><a href="https://github.com/owjapan/ow-editor">GitHub ↗</a></div>
+  </nav></header>
+  <main id="main">
+    <section class="hero shell">
+      <div><p class="eyebrow">A REUSABLE HTML EDITOR</p><h1>HTMLを編集する。<br>どのサービスでも使う。</h1>
+        <p class="lead">文字、画像、表をひとつの編集画面で。<br>編集エンジンから独自実装した、組み込み用エディターの初版です。</p>
+        <div class="button-row"><a class="button primary" href="demo.html">デモを試す <span aria-hidden="true">→</span></a><a class="button secondary" href="https://github.com/owjapan/ow-editor">ソースを見る ↗</a></div>
+        <p class="small muted">ライセンスキー入力・利用回数の計測なし。自己配信にも共通配信にも。</p>
+      </div>
+      <div class="hero-card"><div class="window-bar"><span></span><span></span><span></span><b>ひとつのライブラリ、複数のサービスへ</b></div>
+        <pre><code><span class="code-comment">// JS と CSS を読み込んで接続</span>
+const editor = new OWEditor.RichTextEditor(
+  document.querySelector('#body'),
+  {
+    messages: OWEditor.messages,
+    upload: yourImageUpload
+  }
+);
+
+<span class="code-comment">// 保存先は、あなたのサービスで</span>
+editor.getHTML();</code></pre>
+        <div class="card-foot"><span class="status-dot"></span>ブラウザーで動作 / Rails不要</div>
+      </div>
+    </section>
+    <div class="facts shell"><span><strong>独自実装</strong>編集エンジン・UI・履歴</span><span><strong>2つの形式</strong>通常script / ES module</span><span><strong>HTML出力</strong>既存の保存処理に接続</span></div>
+    <section id="features" class="section shell">
+      <div class="section-title"><p class="eyebrow">FEATURES</p><h2>本文編集の道具を、ひと通り。</h2><p class="muted">対応する操作と、初版の範囲を確認できます。</p></div>
+      <div class="feature-grid">
+        <article class="feature"><span class="feature-number">01 / TEXT</span><h3>文字と段落</h3><p>見出し、太字、斜体、下線、取消線。書体・サイズ・文字色・背景色、段落配置や箇条書きも設定できます。</p><div class="feature-example"><strong>B</strong><i>I</i><u>U</u><span class="highlight">背景色</span><span>H₂</span></div></article>
+        <article class="feature"><span class="feature-number">02 / IMAGE</span><h3>画像と説明文</h3><p>アップロード関数を接続し、画像の幅・高さ・配置、代替テキストとキャプションを編集。幅はスライダーでも変更できます。</p><a href="demo.html#workspace">サンプル画像で試す →</a></article>
+        <article class="feature"><span class="feature-number">03 / TABLE</span><h3>表を組み立てる</h3><p>行・列の追加と削除、セル結合・分割、見出し切替。セルの背景・枠線・幅・配置まで操作できます。</p><div class="mini-table" aria-hidden="true"><span>項目</span><span>内容</span><span></span><span></span></div></article>
+        <article class="feature"><span class="feature-number">04 / WORKFLOW</span><h3>編集を続けやすく</h3><p>Undo / Redo、検索・置換、全画面表示、文字数表示、HTMLソース編集。未保存の本文は、同じタブで復旧できます。</p></article>
+        <article class="feature"><span class="feature-number">05 / SANITIZATION</span><h3>HTMLを安全化</h3><p>貼り付け・ソース編集の実行可能なタグや危険なURLを除去。HTML安全化にはDOMPurifyを同梱しています。</p><p class="small muted">保存権限・画像の実体検査・表示時の安全化は、利用先のサーバーでも行います。</p></article>
+        <article class="feature"><span class="feature-number">06 / INTEGRATION</span><h3>サービスごとに接続</h3><p>画像APIと記事保存先を指定できます。同一フォームの複数フィールドにも対応し、編集中の設定や画像送信があれば保存を止めます。</p><a href="multiple.html">複数フィールドを試す →</a></article>
+      </div>
+    </section>
+    <section class="samples-band"><div class="shell section split">
+      <div><p class="eyebrow">TRY IT</p><h2>まず、操作してみてください。</h2><p class="muted">サンプルは、このリポジトリのライブラリで動作します。<br>本文や選んだ画像を送信するAPIは接続していません。</p></div>
+      <div class="sample-links"><a href="demo.html"><b>記事編集のデモ</b><span>書式・画像・表・HTMLダウンロード</span><i aria-hidden="true">↗</i></a><a href="multiple.html"><b>複数フィールドのデモ</b><span>ES module・下書きの分離・まとめて保存</span><i aria-hidden="true">↗</i></a></div>
+    </div></section>
+    <section id="integration" class="section shell split">
+      <div><p class="eyebrow">INTEGRATION</p><h2>読み込む。接続する。</h2><p class="muted">同じバージョンのJS・CSSを、複数のサービスで利用できます。生成済みのファイルには、NodeやRubyは不要です。</p><p><a href="https://github.com/owjapan/ow-editor#使い方">詳しい組み込み方法はREADMEへ →</a></p><p class="small muted">外部配信では、固定バージョンとrelease.jsonのSRI値を利用してください。</p></div>
+      <div class="code-card"><pre><code>&lt;link rel="stylesheet"
+  href="releases/0.1.0/ow-editor.css"&gt;
+&lt;textarea id="body" name="body"&gt;&lt;/textarea&gt;
+&lt;script src="releases/0.1.0/ow-editor.js"&gt;
+&lt;/script&gt;</code></pre><a href="releases/0.1.0/release.json">0.1.0 の配布情報を見る ↗</a></div>
+    </section>
+    <section class="shell limits"><div><p class="eyebrow">PREVIEW STATUS</p><h2>初版で確認できていること。</h2></div><div><p>文書モデル・書式操作・表・画像・下書き・保存制御は自動試験の対象です。Chromiumでの動作を確認しています。Safari / iOS、Android、macOSの実IMEは追加確認が必要です。</p><p class="small">共同編集、校閲、Word / PDFの完全変換、画像や列境界を直接つかむドラッグ操作は未実装です。既存のすべてのHTMLを同じ見た目で再現することは保証していません。</p></div></section>
+  </main>
+  <footer class="shell footer"><a class="brand" href="./">OWEditor</a><p>Original editing engine. DOMPurify for HTML sanitization.</p><a href="https://github.com/owjapan/ow-editor">GitHub ↗</a></footer>
+</body>
+</html>
