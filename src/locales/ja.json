@@ -19,6 +19,7 @@
   "indent": "字下げ",
   "outdent": "字下げを戻す",
   "align": "配置",
+  "mixedAlignment": "複数の配置",
   "left": "左揃え",
   "center": "中央揃え",
   "right": "右揃え",

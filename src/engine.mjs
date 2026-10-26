@@ -4,6 +4,26 @@ import { editTable, emptyCell, tableGrid } from './tables.mjs'
 
 const copy = value => JSON.parse(JSON.stringify(value))
 const PARAGRAPHS = new Set(['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre'])
+const LIST_BLOCKS = new Set([...PARAGRAPHS, 'figure'])
+const ALIGNMENT_BLOCKS = new Set([...PARAGRAPHS, 'li', 'td', 'th', 'figcaption', 'blockquote', 'figure'])
+const imageLessFigure = node => {
+  if (node.tag !== 'figure' || !node.attrs.class?.split(/\s+/).includes('image')) return false
+  let hasImage = false
+  walk(node, child => { if (child.tag === 'img') hasImage = true })
+  return !hasImage
+}
+const normalizeTextFigure = node => {
+  if (!imageLessFigure(node)) return
+  const style = document.createElement('p'); style.setAttribute('style', node.attrs.style || '')
+  node.tag = 'div'
+  const classes = (node.attrs.class || '').split(/\s+/).filter(name => name !== 'image' && name !== 'image_resized' && !name.startsWith('image-style-'))
+  if (classes.length) node.attrs.class = classes.join(' ')
+  else delete node.attrs.class
+  for (const property of ['width', 'height', 'max-width', 'float', 'display', 'margin-left', 'margin-right']) style.style.removeProperty(property)
+  delete node.attrs.width; delete node.attrs.height
+  if (style.style.cssText) node.attrs.style = style.style.cssText
+  else delete node.attrs.style
+}
 export class History {
   constructor(initial, { maxSteps = 100, maxBytes = 5 * 1024 * 1024 } = {}) {
     this.entries = [copy(initial)]; this.index = 0; this.maxSteps = maxSteps; this.maxBytes = maxBytes; this.kind = null; this.time = 0
@@ -240,17 +260,40 @@ export class EditorEngine {
     transformText(this.doc, this.selection.from, this.selection.to, apply)
     return this._commit()
   }
-  _selectedBlocks() {
+  _selectedBlocks(tags = PARAGRAPHS) {
     const blocks = []
     walk(this.doc, (node, offset, parent) => {
-      if (!PARAGRAPHS.has(node.tag)) return
+      if (!tags.has(node.tag)) return
+      if (node.tag === 'figure' && !imageLessFigure(node)) return
       const end = offset + nodeLength(node) - 1
       if (this.selection.from === this.selection.to ? offset <= this.selection.from && end >= this.selection.from : offset < this.selection.to && end > this.selection.from) blocks.push({ node, parent, offset })
     })
     return blocks.filter(a => !blocks.some(b => b !== a && (() => { let contains = false; walk(a.node, n => { if (n === b.node) contains = true }); return contains })()))
   }
+  getAlignment() {
+    const selected = new Set(this._selectedBlocks(ALIGNMENT_BLOCKS).map(({ node }) => node))
+    const values = new Set()
+    const style = document.createElement('p')
+    const visit = (node, inherited = 'left') => {
+      let own = ''
+      if (node.attrs?.style) { style.setAttribute('style', node.attrs.style); own = style.style.textAlign }
+      const alignment = ['left', 'center', 'right', 'justify'].includes(own) ? own : inherited
+      if (selected.has(node)) {
+        // Captions, table headings and host CSS can supply a visible alignment.
+        const rendered = this.root.querySelector(`[data-rte-node="${node.id}"]`)
+        const computed = rendered ? window.getComputedStyle(rendered).textAlign : ''
+        values.add(['left', 'center', 'right', 'justify'].includes(computed) ? computed : alignment)
+      }
+      for (const child of node.children || []) visit(child, alignment)
+    }
+    visit(this.doc)
+    return values.size > 1 ? '' : [...values][0] || 'left'
+  }
   _blockCommand(name, value) {
-    const blocks = this._selectedBlocks(); if (!blocks.length) return false
+    // Direct text in lists, cells and captions is eligible only for alignment.
+    // Image-less image figures can also be converted into ordinary list items.
+    const tags = name === 'align' ? ALIGNMENT_BLOCKS : ['bulletList', 'orderedList'].includes(name) ? LIST_BLOCKS : PARAGRAPHS
+    const blocks = this._selectedBlocks(tags); if (!blocks.length) return false
     const bookmark = this._modelBookmark()
     if (name === 'indent') {
       const changed = this._indentList(value)
@@ -262,6 +305,8 @@ export class EditorEngine {
     } else if (name === 'align' || name === 'indent') {
       if (name === 'align' && !['left', 'center', 'right', 'justify'].includes(value)) return false
       blocks.forEach(({ node }) => {
+        // Ordinary text can remain inside an image wrapper after image deletion.
+        if (name === 'align') normalizeTextFigure(node)
         const style = document.createElement('p'); style.setAttribute('style', node.attrs.style || '')
         if (name === 'align') style.style.textAlign = value
         else style.style.marginLeft = `${Math.max(0, Math.min(400, (parseInt(style.style.marginLeft, 10) || 0) + (value < 0 ? -40 : 40)))}px`
@@ -274,6 +319,7 @@ export class EditorEngine {
         if ((tag === 'blockquote' ? node.tag === tag : ['ul', 'ol'].includes(node.tag)) && offset <= this.selection.from && offset + nodeLength(node) >= this.selection.to) existing = { node, parent, offset }
       })
       if (existing) {
+        blocks.forEach(({ node }) => normalizeTextFigure(node))
         if (existing.node.tag !== tag) existing.node.tag = tag
         else if (tag === 'blockquote') existing.parent.children.splice(existing.parent.children.indexOf(existing.node), 1, ...existing.node.children)
         else {
@@ -290,6 +336,7 @@ export class EditorEngine {
       } else {
         const parent = blocks[0].parent
         if (!blocks.every(b => b.parent === parent)) return false
+        blocks.forEach(({ node }) => normalizeTextFigure(node))
         const nodes = blocks.map(b => b.node), start = parent.children.indexOf(nodes[0])
         parent.children = parent.children.filter(child => !nodes.includes(child))
         parent.children.splice(start, 0, element(tag, tag === 'blockquote' ? nodes : nodes.map(node => element('li', [node]))))

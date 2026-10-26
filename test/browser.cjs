@@ -65,6 +65,76 @@ test('article demo edits, adds a sample image and downloads sanitized HTML witho
     await page.screenshot({ path: path.join(results, 'demo-desktop.png'), fullPage: true })
   })
 })
+test('alignment menu follows the selection and aligns paragraphs, list text and cell text', async () => {
+  await pageAt('demo.html', async page => {
+    await page.waitForSelector('.df-editor-body[contenteditable=true]')
+    await page.click('[data-rte-action=source]')
+    await page.$eval('[data-rte-source]', e => { e.value = '<p style="text-align:center">Centered paragraph</p><ul><li style="text-align:right">List text</li></ul><table><tbody><tr><td style="text-align:center">Cell text</td></tr></tbody></table>' })
+    await page.click('[data-rte-apply]')
+    const menu = '[aria-label="配置"]'
+    for (const [selector, before, after] of [
+      ['.df-editor-body > p', 'center', 'left'],
+      ['.df-editor-body li', 'right', 'left'],
+      ['.df-editor-body td', 'center', 'right'],
+    ]) {
+      await page.click(selector)
+      await page.waitForFunction((selector, value) => document.querySelector(selector).value === value, {}, menu, before)
+      await page.select(menu, after)
+      assert.equal(await page.$eval(selector, e => getComputedStyle(e).textAlign), after)
+      await page.click('[data-rte-action=undo]')
+      assert.equal(await page.$eval(selector, e => getComputedStyle(e).textAlign), before)
+      // Undo restores the historical caret as well as the content.
+      await page.click(selector)
+      await page.waitForFunction((selector, value) => document.querySelector(selector).value === value, {}, menu, before)
+      assert.equal(await page.$eval(menu, e => e.value), before)
+      await page.click('[data-rte-action=redo]')
+      assert.equal(await page.$eval(menu, e => e.value), after)
+    }
+    await page.screenshot({ path: path.join(results, 'alignment-desktop.png'), fullPage: true })
+  })
+})
+test('text remaining after image deletion aligns to the body edge instead of a centered narrow figure', async () => {
+  await pageAt('demo.html', async page => {
+    await page.waitForSelector('.df-editor-body[contenteditable=true]')
+    await page.click('[data-rte-action=source]')
+    await page.$eval('[data-rte-source]', e => { e.value = '<figure class="image">Text after image deletion</figure><p>Unchanged paragraph</p>' })
+    await page.click('[data-rte-apply]')
+    await page.click('.df-editor-body > figure')
+    await page.select('[aria-label="配置"]', 'right')
+    assert.equal(await page.$eval('.df-editor-body > :first-child', e => e.tagName), 'DIV')
+    const distance = await page.$eval('.df-editor-body', body => {
+      const range = document.createRange(); range.selectNodeContents(body.firstElementChild)
+      return Math.abs(range.getBoundingClientRect().right - (body.getBoundingClientRect().right - parseFloat(getComputedStyle(body).paddingRight)))
+    })
+    assert(distance < 2, 'text reaches the right edge of the full editable content area')
+    await page.click('[data-rte-action=undo]')
+    assert.equal(await page.$eval('.df-editor-body > :first-child', e => e.tagName), 'FIGURE')
+    await page.click('[data-rte-action=redo]')
+    assert.equal(await page.$eval('.df-editor-body > :first-child', e => e.style.textAlign), 'right')
+    await page.screenshot({ path: path.join(results, 'figure-text-right.png'), fullPage: true })
+  })
+})
+test('bullet and numbered lists can start and stop on text remaining after image deletion', async () => {
+  for (const [command, tag, marker] of [['bulletList', 'ul', 'disc'], ['orderedList', 'ol', 'decimal']]) {
+    await pageAt('demo.html', async page => {
+      await page.waitForSelector('.df-editor-body[contenteditable=true]')
+      await page.click('[data-rte-action=source]')
+      await page.$eval('[data-rte-source]', e => { e.value = '<figure class="image" style="width:30%;margin-left:auto"><strong>List text</strong></figure><p>Unchanged paragraph</p>' })
+      await page.click('[data-rte-apply]')
+      await page.click('.df-editor-body > figure')
+      await page.click(`[data-rte-action=${command}]`)
+      assert.equal(await page.$$eval(`.df-editor-body > ${tag} > li`, items => items.length), 1)
+      assert.equal(await page.$eval(`.df-editor-body > ${tag} > li`, e => getComputedStyle(e).display), 'list-item')
+      assert.equal(await page.$eval(`.df-editor-body > ${tag}`, e => getComputedStyle(e).listStyleType), marker)
+      assert.equal(await page.$eval(`.df-editor-body > ${tag} > li > div`, e => e.className), '')
+      assert.equal(await page.$eval(`.df-editor-body > ${tag} strong`, e => e.textContent), 'List text')
+      await page.screenshot({ path: path.join(results, `${command}-deleted-image.png`), fullPage: true })
+      await page.click(`[data-rte-action=${command}]`)
+      assert.equal(await page.$$eval(`.df-editor-body > ${tag}`, items => items.length), 0)
+      assert.equal(await page.$eval('.df-editor-body > div strong', e => e.textContent), 'List text')
+    })
+  }
+})
 test('source editing blocks export, cancel retains text and apply removes executable HTML', async () => {
   await pageAt('demo.html', async page => {
     await page.waitForSelector('.df-editor-body[contenteditable=true]')

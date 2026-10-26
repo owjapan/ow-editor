@@ -1,4 +1,4 @@
-import { RichTextEditor, messages } from '../releases/0.1.0/ow-editor.mjs'
+import { RichTextEditor, messages } from '../releases/0.1.1/ow-editor.mjs'
 const form = document.getElementById('article-form'), editors = []
 try {
   for (const field of form.querySelectorAll('textarea')) editors.push(new RichTextEditor(field, {

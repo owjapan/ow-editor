@@ -3,7 +3,7 @@ import { cleanHTML, createDraftStore, safeLink } from './safety.mjs'
 import { findNode, walk } from './document.mjs'
 
 // Original, small SVG paths. No CKEditor/Tiptap UI assets are used.
-export const VERSION = '0.1.0'
+export const VERSION = '0.1.1'
 
 const formStates = new WeakMap()
 let anonymousDraft = 0
@@ -124,7 +124,8 @@ export class RichTextEditor {
     this._button('outdent', () => this.run('indent', -1), lists, { command: 'indent', value: -1 })
     this._button('indent', () => this.run('indent', 1), lists, { command: 'indent', value: 1 })
     const alignment = this._group()
-    this._select('align', ['left', 'center', 'right', 'justify'].map(value => [value, this.label(value)]), value => this.run('align', value), alignment)
+    this.alignment = this._select('align', [['', this.label('mixedAlignment')], ...['left', 'center', 'right', 'justify'].map(value => [value, this.label(value)])], value => this.run('align', value), alignment)
+    this.alignment.options[0].disabled = true
     const insert = this._group()
     this._button('link', () => this.openLink(), insert)
     this.imageButton = this._button('image', () => this.pickImage(), insert)
@@ -175,6 +176,7 @@ export class RichTextEditor {
     for (const control of this.toolbar.querySelectorAll('button,select,input')) control.disabled = !enabled
     this.imageButton.disabled = !enabled || typeof this.options.upload !== 'function'
     const marks = this.engine.getMarks()
+    this.alignment.value = this.engine.getAlignment()
     for (const control of this.controls) {
       const name = control.dataset.rteCommand
       if (['bold', 'italic', 'underline', 'strike'].includes(name)) control.setAttribute('aria-pressed', String(!!marks[name]))

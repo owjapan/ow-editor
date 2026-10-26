@@ -12,9 +12,9 @@
 
 ```html
 <link rel="stylesheet"
-      href="https://owjapan.github.io/ow-editor/releases/0.1.0/ow-editor.css">
+      href="https://owjapan.github.io/ow-editor/releases/0.1.1/ow-editor.css">
 <textarea id="body" name="body"><p>記事本文</p></textarea>
-<script src="https://owjapan.github.io/ow-editor/releases/0.1.0/ow-editor.js"></script>
+<script src="https://owjapan.github.io/ow-editor/releases/0.1.1/ow-editor.js"></script>
 <script>
   const editor = new OWEditor.RichTextEditor(document.querySelector('#body'), {
     messages: OWEditor.messages,
@@ -23,7 +23,7 @@
 </script>
 ```
 
-実際の外部配信ではバージョンを固定し、[release.json](docs/releases/0.1.0/release.json)にある各ファイルの`integrity`値と`crossorigin="anonymous"`をscript/linkへ設定してください。同じファイルを自分のサービス内へコピーして配信することもできます。
+実際の外部配信ではバージョンを固定し、[release.json](docs/releases/0.1.1/release.json)にある各ファイルの`integrity`値と`crossorigin="anonymous"`をscript/linkへ設定してください。同じファイルを自分のサービス内へコピーして配信することもできます。
 
 ### 画像APIを接続する
 
@@ -70,7 +70,7 @@ CSSは共通です。生成済みmoduleにはDOMPurifyも同梱しています�
 
 ```javascript
 import { RichTextEditor, messages, VERSION }
-  from 'https://owjapan.github.io/ow-editor/releases/0.1.0/ow-editor.mjs';
+  from 'https://owjapan.github.io/ow-editor/releases/0.1.1/ow-editor.mjs';
 const editor = new RichTextEditor(document.querySelector('#body'), { messages });
 ```
 
