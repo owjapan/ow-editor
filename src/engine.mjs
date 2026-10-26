@@ -4,7 +4,13 @@ import { editTable, emptyCell, tableGrid } from './tables.mjs'
 
 const copy = value => JSON.parse(JSON.stringify(value))
 const PARAGRAPHS = new Set(['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre'])
-const ALIGNMENT_BLOCKS = new Set([...PARAGRAPHS, 'li', 'td', 'th', 'figcaption', 'blockquote'])
+const ALIGNMENT_BLOCKS = new Set([...PARAGRAPHS, 'li', 'td', 'th', 'figcaption', 'blockquote', 'figure'])
+const imageLessFigure = node => {
+  if (node.tag !== 'figure' || !node.attrs.class?.split(/\s+/).includes('image')) return false
+  let hasImage = false
+  walk(node, child => { if (child.tag === 'img') hasImage = true })
+  return !hasImage
+}
 export class History {
   constructor(initial, { maxSteps = 100, maxBytes = 5 * 1024 * 1024 } = {}) {
     this.entries = [copy(initial)]; this.index = 0; this.maxSteps = maxSteps; this.maxBytes = maxBytes; this.kind = null; this.time = 0
@@ -245,6 +251,7 @@ export class EditorEngine {
     const blocks = []
     walk(this.doc, (node, offset, parent) => {
       if (!tags.has(node.tag)) return
+      if (node.tag === 'figure' && !imageLessFigure(node)) return
       const end = offset + nodeLength(node) - 1
       if (this.selection.from === this.selection.to ? offset <= this.selection.from && end >= this.selection.from : offset < this.selection.to && end > this.selection.from) blocks.push({ node, parent, offset })
     })
@@ -285,6 +292,16 @@ export class EditorEngine {
       if (name === 'align' && !['left', 'center', 'right', 'justify'].includes(value)) return false
       blocks.forEach(({ node }) => {
         const style = document.createElement('p'); style.setAttribute('style', node.attrs.style || '')
+        if (name === 'align' && imageLessFigure(node)) {
+          // After deleting an image, its figure may still contain ordinary text.
+          // A shrink-to-fit image wrapper cannot align that text to the body edge.
+          node.tag = 'div'
+          const classes = (node.attrs.class || '').split(/\s+/).filter(name => name !== 'image' && name !== 'image_resized' && !name.startsWith('image-style-'))
+          if (classes.length) node.attrs.class = classes.join(' ')
+          else delete node.attrs.class
+          for (const property of ['width', 'height', 'max-width', 'float', 'display', 'margin-left', 'margin-right']) style.style.removeProperty(property)
+          delete node.attrs.width; delete node.attrs.height
+        }
         if (name === 'align') style.style.textAlign = value
         else style.style.marginLeft = `${Math.max(0, Math.min(400, (parseInt(style.style.marginLeft, 10) || 0) + (value < 0 ? -40 : 40)))}px`
         node.attrs.style = style.style.cssText

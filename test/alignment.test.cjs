@@ -78,3 +78,31 @@ for (const [name, html, tag] of [
   const saved = e.getHTML(); e.destroy()
   assert.equal(createEditor(saved).body.querySelector(tag).style.textAlign, 'left')
 })
+
+test('right alignment expands an image-less image figure into a normal text block only on command', () => {
+  const original = '<figure class="image image_resized image-style-align-center marker-yellow" style="width:40%;height:100px;margin-left:auto;margin-right:auto"><strong>ABC</strong></figure><p>次の段落</p>'
+  const e = createEditor(original)
+  assert.equal(e.getHTML(), original)
+  selectText(1); e.run('align', 'right')
+  const block = e.body.firstElementChild
+  assert.equal(block.tagName, 'DIV')
+  assert.equal(block.style.textAlign, 'right')
+  assert.equal(block.className, 'marker-yellow')
+  for (const property of ['width', 'height', 'marginLeft', 'marginRight']) assert.equal(block.style[property], '')
+  assert.equal(block.querySelector('strong').textContent, 'ABC')
+  assert.equal(e.body.querySelector('p').getAttribute('style'), null)
+  const saved = e.getHTML()
+  e.run('undo'); assert.equal(e.getHTML(), original)
+  e.run('redo'); assert.equal(e.getHTML(), saved)
+  e.destroy(); assert.equal(createEditor(saved).body.firstElementChild.style.textAlign, 'right')
+})
+
+test('aligning text from a deleted image does not convert a neighboring real image or unrelated figure', () => {
+  const e = createEditor('<figure class="image">ABC</figure><figure class="image image-style-align-right" style="width:50%"><img src="/images/sample.png"><figcaption>説明</figcaption></figure><figure class="table"><table><tbody><tr><td>セル</td></tr></tbody></table></figure>')
+  const imagesBefore = e.body.querySelectorAll('figure')[1].outerHTML
+  const tableBefore = e.body.querySelectorAll('figure')[2].outerHTML
+  selectText(1); assert.equal(e.run('heading', 'h2'), false)
+  assert.equal(e.run('align', 'right'), true)
+  assert.equal(e.body.querySelector('figure.image').outerHTML, imagesBefore)
+  assert.equal(e.body.querySelector('figure.table').outerHTML, tableBefore)
+})

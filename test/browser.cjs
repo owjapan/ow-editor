@@ -93,6 +93,27 @@ test('alignment menu follows the selection and aligns paragraphs, list text and 
     await page.screenshot({ path: path.join(results, 'alignment-desktop.png'), fullPage: true })
   })
 })
+test('text remaining after image deletion aligns to the body edge instead of a centered narrow figure', async () => {
+  await pageAt('demo.html', async page => {
+    await page.waitForSelector('.df-editor-body[contenteditable=true]')
+    await page.click('[data-rte-action=source]')
+    await page.$eval('[data-rte-source]', e => { e.value = '<figure class="image">Text after image deletion</figure><p>Unchanged paragraph</p>' })
+    await page.click('[data-rte-apply]')
+    await page.click('.df-editor-body > figure')
+    await page.select('[aria-label="配置"]', 'right')
+    assert.equal(await page.$eval('.df-editor-body > :first-child', e => e.tagName), 'DIV')
+    const distance = await page.$eval('.df-editor-body', body => {
+      const range = document.createRange(); range.selectNodeContents(body.firstElementChild)
+      return Math.abs(range.getBoundingClientRect().right - (body.getBoundingClientRect().right - parseFloat(getComputedStyle(body).paddingRight)))
+    })
+    assert(distance < 2, 'text reaches the right edge of the full editable content area')
+    await page.click('[data-rte-action=undo]')
+    assert.equal(await page.$eval('.df-editor-body > :first-child', e => e.tagName), 'FIGURE')
+    await page.click('[data-rte-action=redo]')
+    assert.equal(await page.$eval('.df-editor-body > :first-child', e => e.style.textAlign), 'right')
+    await page.screenshot({ path: path.join(results, 'figure-text-right.png'), fullPage: true })
+  })
+})
 test('source editing blocks export, cancel retains text and apply removes executable HTML', async () => {
   await pageAt('demo.html', async page => {
     await page.waitForSelector('.df-editor-body[contenteditable=true]')
