@@ -4,6 +4,7 @@ import { editTable, emptyCell, tableGrid } from './tables.mjs'
 
 const copy = value => JSON.parse(JSON.stringify(value))
 const PARAGRAPHS = new Set(['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre'])
+const ALIGNMENT_BLOCKS = new Set([...PARAGRAPHS, 'li', 'td', 'th', 'figcaption', 'blockquote'])
 export class History {
   constructor(initial, { maxSteps = 100, maxBytes = 5 * 1024 * 1024 } = {}) {
     this.entries = [copy(initial)]; this.index = 0; this.maxSteps = maxSteps; this.maxBytes = maxBytes; this.kind = null; this.time = 0
@@ -240,17 +241,38 @@ export class EditorEngine {
     transformText(this.doc, this.selection.from, this.selection.to, apply)
     return this._commit()
   }
-  _selectedBlocks() {
+  _selectedBlocks(tags = PARAGRAPHS) {
     const blocks = []
     walk(this.doc, (node, offset, parent) => {
-      if (!PARAGRAPHS.has(node.tag)) return
+      if (!tags.has(node.tag)) return
       const end = offset + nodeLength(node) - 1
       if (this.selection.from === this.selection.to ? offset <= this.selection.from && end >= this.selection.from : offset < this.selection.to && end > this.selection.from) blocks.push({ node, parent, offset })
     })
     return blocks.filter(a => !blocks.some(b => b !== a && (() => { let contains = false; walk(a.node, n => { if (n === b.node) contains = true }); return contains })()))
   }
+  getAlignment() {
+    const selected = new Set(this._selectedBlocks(ALIGNMENT_BLOCKS).map(({ node }) => node))
+    const values = new Set()
+    const style = document.createElement('p')
+    const visit = (node, inherited = 'left') => {
+      let own = ''
+      if (node.attrs?.style) { style.setAttribute('style', node.attrs.style); own = style.style.textAlign }
+      const alignment = ['left', 'center', 'right', 'justify'].includes(own) ? own : inherited
+      if (selected.has(node)) {
+        // Captions, table headings and host CSS can supply a visible alignment.
+        const rendered = this.root.querySelector(`[data-rte-node="${node.id}"]`)
+        const computed = rendered ? window.getComputedStyle(rendered).textAlign : ''
+        values.add(['left', 'center', 'right', 'justify'].includes(computed) ? computed : alignment)
+      }
+      for (const child of node.children || []) visit(child, alignment)
+    }
+    visit(this.doc)
+    return values.size > 1 ? '' : [...values][0] || 'left'
+  }
   _blockCommand(name, value) {
-    const blocks = this._selectedBlocks(); if (!blocks.length) return false
+    // Lists, table cells and captions may contain text without a <p>.
+    // Do not make those containers eligible for heading/list transformations.
+    const blocks = this._selectedBlocks(name === 'align' ? ALIGNMENT_BLOCKS : PARAGRAPHS); if (!blocks.length) return false
     const bookmark = this._modelBookmark()
     if (name === 'indent') {
       const changed = this._indentList(value)

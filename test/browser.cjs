@@ -65,6 +65,34 @@ test('article demo edits, adds a sample image and downloads sanitized HTML witho
     await page.screenshot({ path: path.join(results, 'demo-desktop.png'), fullPage: true })
   })
 })
+test('alignment menu follows the selection and aligns paragraphs, list text and cell text', async () => {
+  await pageAt('demo.html', async page => {
+    await page.waitForSelector('.df-editor-body[contenteditable=true]')
+    await page.click('[data-rte-action=source]')
+    await page.$eval('[data-rte-source]', e => { e.value = '<p style="text-align:center">Centered paragraph</p><ul><li style="text-align:right">List text</li></ul><table><tbody><tr><td style="text-align:center">Cell text</td></tr></tbody></table>' })
+    await page.click('[data-rte-apply]')
+    const menu = '[aria-label="配置"]'
+    for (const [selector, before, after] of [
+      ['.df-editor-body > p', 'center', 'left'],
+      ['.df-editor-body li', 'right', 'left'],
+      ['.df-editor-body td', 'center', 'right'],
+    ]) {
+      await page.click(selector)
+      await page.waitForFunction((selector, value) => document.querySelector(selector).value === value, {}, menu, before)
+      await page.select(menu, after)
+      assert.equal(await page.$eval(selector, e => getComputedStyle(e).textAlign), after)
+      await page.click('[data-rte-action=undo]')
+      assert.equal(await page.$eval(selector, e => getComputedStyle(e).textAlign), before)
+      // Undo restores the historical caret as well as the content.
+      await page.click(selector)
+      await page.waitForFunction((selector, value) => document.querySelector(selector).value === value, {}, menu, before)
+      assert.equal(await page.$eval(menu, e => e.value), before)
+      await page.click('[data-rte-action=redo]')
+      assert.equal(await page.$eval(menu, e => e.value), after)
+    }
+    await page.screenshot({ path: path.join(results, 'alignment-desktop.png'), fullPage: true })
+  })
+})
 test('source editing blocks export, cancel retains text and apply removes executable HTML', async () => {
   await pageAt('demo.html', async page => {
     await page.waitForSelector('.df-editor-body[contenteditable=true]')
